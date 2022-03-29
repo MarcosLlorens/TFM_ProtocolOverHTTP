@@ -1,18 +1,21 @@
 package org.acme;
 
-import io.vertx.core.Vertx;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Promise;
 import io.vertx.core.net.NetServerOptions;
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-@ApplicationScoped
-public class VertXServer {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class VertXServer extends AbstractVerticle {
+    private static final Logger logger = LoggerFactory.getLogger(VertXServer.class);
     static final String HOST = System.getProperty("host", "localhost");
     static final int PORT = Integer.parseInt(System.getProperty("port", "5000"));
 
-    @PostConstruct
-    public void createServer() {
-        Vertx vertx = Vertx.vertx();
+    @Override
+    public void start(Promise<Void> startPromise) {
         var options = new NetServerOptions().setPort(PORT).setHost(HOST);
         var server = vertx.createNetServer(options);
         server.connectHandler(
@@ -29,6 +32,7 @@ public class VertXServer {
                             });
                 });
         server.listen();
+        startPromise.complete();
     }
     public String toBits(final byte[] valArray) {
         byte val;
